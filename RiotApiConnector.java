@@ -11,18 +11,24 @@ import java.util.Scanner;
 
 public class RiotApiConnector {
 	
+	/*
+	 *This class functions as a connector(bridge)
+	 *between Riot's API and Riot's THIRD PARTY JAVA API
+	 */
+	
 	private final String myApiKey = "";
+	private Scanner sc = new Scanner(System.in);;//Used to get user input
+	private ArrayList<Game> myArrayList = new ArrayList<Game>();//Stores "Games" as Game objects
+	private ArrayList<Player> myFellowPlayersList = new ArrayList<Player>();//Stores "Players" as Player objects
 	
-	Scanner sc = new Scanner(System.in);
-	ArrayList<Game> myArrayList = new ArrayList<Game>();
-	ArrayList<Player> myFellowPlayersList = new ArrayList<Player>();
-	RiotApi riotApi= new RiotApi(myApiKey,Region.EUW);
+	private RiotApi riotApi= new RiotApi(myApiKey);
 	
+
 	public void myFunction() throws InterruptedException{
-	
 		try{
-			System.out.println("Enter the name of the summoner you want to search. \nInput: ");
-			Summoner summoner = riotApi.getSummonerByName(riotApi.getRegion(), sc.nextLine());
+			getUserInput_SummonerRegion();
+			Summoner summoner = riotApi.getSummonerByName(riotApi.getRegion(),getUserInput_SummonerName());
+			
 			RecentGames myRecentGames = riotApi.getRecentGames(summoner.getId());
 			Champion myChampion;
 			
@@ -82,5 +88,38 @@ public class RiotApiConnector {
 			System.err.printf("Error happened at : %s\n\n",ie);
 			ie.printStackTrace();
 		}
+	}
+	
+	private Region getUserInput_SummonerRegion(){//User inputs preferred region to search 
+		Region[] regions = new Region[]{Region.EUW,Region.EUNE,Region.NA};
+		String regionInput;
+		System.out.format("Select region.\n"
+				+ "Available regions are : %s,%s and %s \n"
+				+ "If invalid input is give NA will be set as searching region.\n",
+					regions[0],
+					regions[1],
+					regions[2]);
+		try{
+			System.out.println("regions[0].toString() is : " + regions[0].toString());
+			regionInput = sc.nextLine();
+			if( regionInput.matches(regions[0].toString())){
+				riotApi.setRegion(regions[0]);
+				 riotApi.getRegion();
+			}
+			if(regionInput.matches(regions[1].toString())){
+				riotApi.setRegion(regions[1]);
+				 riotApi.getRegion();
+			}
+		}catch(Exception e){
+			System.out.println("Wrong region.\n");
+			getUserInput_SummonerRegion();
+		}
+			System.out.println("Region: " + riotApi.getRegion() + " region");
+		return Region.NA;
+	}
+	
+	private String getUserInput_SummonerName(){
+		System.out.println("Enter the name of the summoner you want to search. \nInput: ");
+		return sc.next();
 	}
 }
